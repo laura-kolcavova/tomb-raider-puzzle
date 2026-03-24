@@ -11,9 +11,7 @@ export const createPuzzleGame = () => {
     const connectedPillarA = puzzle.pillars[connectedPositions[0]];
     const connectedPillarB = puzzle.pillars[connectedPositions[1]];
 
-    console.log("before", pillar);
     rotateClockwise(pillar);
-    console.log("after", pillar);
     rotateClockwise(connectedPillarA);
     rotateClockwise(connectedPillarB);
   };

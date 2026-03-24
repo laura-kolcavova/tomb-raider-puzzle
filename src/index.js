@@ -1,20 +1,7 @@
-import { createPuzzleGame } from "./core/fourPillarsPuzzle/puzzleGame";
+import { createGameApp } from "./web/fourPillarsPuzzle/gameApp";
 
-const { puzzle, rotatePillarClockwise, rotatePillarCounterClockwise } =
-  createPuzzleGame();
+const gameApp = createGameApp();
 
-console.log("tombRaiderPuzzle is available in the console");
+gameApp.addCanvas("gameCanvas");
 
-console.log(puzzle);
-
-rotatePillarClockwise(puzzle.pillars[0].position);
-
-console.log(puzzle);
-
-rotatePillarClockwise(puzzle.pillars[0].position);
-
-console.log(puzzle);
-
-rotatePillarClockwise(puzzle.pillars[0].position);
-
-console.log(puzzle);
+gameApp.run();
