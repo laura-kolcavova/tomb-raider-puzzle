@@ -1,21 +1,19 @@
 import { createPuzzleGame } from "../../core/fourPillarsPuzzle/puzzleGame";
+import { drawPillars } from "./renderer";
 
-const PILLAR_PART_COLORS = {
-  0: "#1d4ed8",
-  1: "#dc2626",
-  2: "#facc15",
-  3: "#16a34a",
-};
-
-const PILLAR_STROKE_COLOR = "#111827";
-
-const PILLAR_STROKE_WIDTH = 3;
+const TARGET_FPS = 60;
+const TARGET_ELAPSED_TIME_IN_MS = 1000 / TARGET_FPS;
+const IS_FIXED_TIME_STEP = true;
 
 export const createGameApp = () => {
   const game = {
     canvas: null,
     canvasContext: null,
     puzzleGame: null,
+    previousFrameTimeInMs: 0,
+    accumulatedElapsedTimeInMs: 0,
+    elapsedGameTimeInMs: 0,
+    totalGameTimeInMs: 0,
   };
 
   const addCanvas = (canvasId) => {
@@ -23,29 +21,57 @@ export const createGameApp = () => {
     game.canvasContext = game.canvas.getContext("2d");
   };
 
-  const build = () => {
+  const run = () => {
     game.puzzleGame = createPuzzleGame();
+
+    game.previousFrameTime = performance.now();
+
+    gameLoop(game, 0);
   };
 
-  const run = () => {
-    build();
-    gameLoop(game);
+  const gameLoop = (currentFrameTimeInMs) => {
+    const deltaTimeInMs = currentFrameTimeInMs - game.previousFrameTimeInMs;
+
+    game.accumulatedElapsedTimeInMs += deltaTimeInMs;
+    game.previousFrameTimeInMs = currentFrameTimeInMs;
+
+    if (IS_FIXED_TIME_STEP) {
+      game.elapsedGameTimeInMs = TARGET_ELAPSED_TIME_IN_MS;
+
+      let stepCount = 0;
+
+      while (game.accumulatedElapsedTimeInMs >= TARGET_ELAPSED_TIME_IN_MS) {
+        game.totalGameTimeInMs += TARGET_ELAPSED_TIME_IN_MS;
+        game.accumulatedElapsedTimeInMs -= TARGET_ELAPSED_TIME_IN_MS;
+        ++stepCount;
+
+        update(game);
+      }
+
+      game.elapsedGameTimeInMs = TARGET_ELAPSED_TIME_IN_MS * stepCount;
+      // if (deltaTimeInMs >= TARGET_ELAPSED_TIME_IN_MS) {
+      //   game.previousFrameTimeInMs =
+      //     currentFrameTimeInMs - (deltaTimeInMs % TARGET_ELAPSED_TIME_IN_MS);
+
+      //   update(game);
+      // }
+    } else {
+      game.elapsedGameTimeInMs = game.accumulatedElapsedTimeInMs;
+      game.totalGameTimeInMs += game.accumulatedElapsedTimeInMs;
+      game.accumulatedElapsedTimeInMs = 0;
+
+      update(game);
+    }
+
+    draw(game);
+
+    requestAnimationFrame(gameLoop);
   };
 
   return {
     addCanvas,
     run,
-    build,
   };
-};
-
-const gameLoop = (game) => {
-  update(game);
-  draw(game);
-
-  requestAnimationFrame(() => {
-    gameLoop(game);
-  });
 };
 
 const update = (game) => {};
@@ -55,52 +81,5 @@ const draw = (game) => {
 
   canvasContext.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawPillars(puzzleGame.puzzle.pillars);
-};
-
-const drawPillars = (pillars) => {
-  const radius = 55;
-  const offsetX = 220;
-  const offsetY = 120;
-  const gapX = 220;
-  const gapY = 170;
-
-  pillars.forEach((pillar, index) => {
-    const col = index % 2;
-    const row = Math.floor(index / 2);
-
-    const centerX = offsetX + col * gapX;
-    const centerY = offsetY + row * gapY;
-
-    drawPillar(canvasContext, pillar, centerX, centerY, radius);
-  });
-};
-
-const drawPillar = (context, pillar, centerX, centerY, radius) => {
-  const parts = pillar.parts[pillar.rotationState];
-
-  const quarterAngles = [
-    [-Math.PI / 2, 0],
-    [0, Math.PI / 2],
-    [Math.PI / 2, Math.PI],
-    [Math.PI, (3 * Math.PI) / 2],
-  ];
-
-  quarterAngles.forEach(([startAngle, endAngle], index) => {
-    const partValue = parts[index];
-
-    context.beginPath();
-    context.moveTo(centerX, centerY);
-    context.arc(centerX, centerY, radius, startAngle, endAngle);
-    context.closePath();
-
-    context.fillStyle = PILLAR_PART_COLORS[partValue];
-    context.fill();
-  });
-
-  context.beginPath();
-  context.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-  context.strokeStyle = PILLAR_STROKE_COLOR;
-  context.lineWidth = PILLAR_STROKE_WIDTH;
-  context.stroke();
+  drawPillars(canvasContext, puzzleGame.puzzle.pillars);
 };
