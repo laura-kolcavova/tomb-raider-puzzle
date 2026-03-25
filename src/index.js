@@ -4,4 +4,6 @@ const gameApp = createGameApp();
 
 gameApp.addCanvas("gameCanvas");
 
+gameApp.build();
+
 gameApp.run();
