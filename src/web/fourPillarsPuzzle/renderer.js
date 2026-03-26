@@ -3,12 +3,12 @@ import {
   arrowCounterClockwiseImage,
 } from "./contentManager";
 
-const PILLAR_PART_COLORS = {
-  0: "#16a34a",
-  1: "#1d4ed8",
-  2: "#dc2626",
-  3: "#facc15",
-};
+const PILLAR_PART_COLORS = [
+  "#16a34a", // green
+  "#1d4ed8", // blue
+  "#dc2626", // red
+  "#facc15", // yellow
+];
 
 const PILLAR_STROKE_COLOR = "#111827";
 

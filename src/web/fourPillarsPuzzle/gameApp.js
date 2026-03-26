@@ -1,6 +1,4 @@
-import { createPuzzleGame } from "../../core/fourPillarsPuzzle/puzzleGame";
-import { loadContent } from "./contentManager";
-import { drawPillars } from "./renderer";
+import { createPlayScene } from "./playScene";
 
 const TARGET_FPS = 60;
 const TARGET_ELAPSED_TIME_IN_MS = 1000 / TARGET_FPS;
@@ -10,7 +8,10 @@ export const createGameApp = () => {
   const game = {
     canvas: null,
     canvasContext: null,
-    puzzleGame: null,
+    currentScene: null,
+  };
+
+  const gameTime = {
     previousFrameTimeInMs: 0,
     accumulatedElapsedTimeInMs: 0,
     elapsedGameTimeInMs: 0,
@@ -22,14 +23,10 @@ export const createGameApp = () => {
     game.canvasContext = game.canvas.getContext("2d");
   };
 
-  const run = () => {
-    loadContent();
+  const initialize = () => {
+    game.currentScene = createPlayScene(game);
 
-    game.puzzleGame = createPuzzleGame();
-
-    game.previousFrameTime = performance.now();
-
-    gameLoop(game, 0);
+    game.currentScene.initialize();
   };
 
   const gameLoop = (currentFrameTimeInMs) => {
@@ -39,51 +36,63 @@ export const createGameApp = () => {
     //   game.previousFrameTimeInMs =
     //     currentFrameTimeInMs - (deltaTimeInMs % TARGET_ELAPSED_TIME_IN_MS);
 
-    //   update(game);
+    //   update();
     // }
 
-    game.accumulatedElapsedTimeInMs += deltaTimeInMs;
-    game.previousFrameTimeInMs = currentFrameTimeInMs;
+    gameTime.accumulatedElapsedTimeInMs += deltaTimeInMs;
+    gameTime.previousFrameTimeInMs = currentFrameTimeInMs;
 
     if (IS_FIXED_TIME_STEP) {
-      game.elapsedGameTimeInMs = TARGET_ELAPSED_TIME_IN_MS;
+      gameTime.elapsedGameTimeInMs = TARGET_ELAPSED_TIME_IN_MS;
 
       let stepCount = 0;
 
-      while (game.accumulatedElapsedTimeInMs >= TARGET_ELAPSED_TIME_IN_MS) {
-        game.totalGameTimeInMs += TARGET_ELAPSED_TIME_IN_MS;
-        game.accumulatedElapsedTimeInMs -= TARGET_ELAPSED_TIME_IN_MS;
+      while (gameTime.accumulatedElapsedTimeInMs >= TARGET_ELAPSED_TIME_IN_MS) {
+        gameTime.totalGameTimeInMs += TARGET_ELAPSED_TIME_IN_MS;
+        gameTime.accumulatedElapsedTimeInMs -= TARGET_ELAPSED_TIME_IN_MS;
         ++stepCount;
 
-        update(game);
+        update();
       }
 
-      game.elapsedGameTimeInMs = TARGET_ELAPSED_TIME_IN_MS * stepCount;
+      gameTime.elapsedGameTimeInMs = TARGET_ELAPSED_TIME_IN_MS * stepCount;
     } else {
-      game.elapsedGameTimeInMs = game.accumulatedElapsedTimeInMs;
-      game.totalGameTimeInMs += game.accumulatedElapsedTimeInMs;
-      game.accumulatedElapsedTimeInMs = 0;
+      gameTime.elapsedGameTimeInMs = gameTime.accumulatedElapsedTimeInMs;
+      gameTime.totalGameTimeInMs += gameTime.accumulatedElapsedTimeInMs;
+      gameTime.accumulatedElapsedTimeInMs = 0;
 
-      update(game);
+      update();
     }
 
-    draw(game);
+    draw();
 
     requestAnimationFrame(gameLoop);
+  };
+
+  const update = () => {
+    const { currentScene } = game;
+
+    currentScene.update(gameTime);
+  };
+
+  const draw = () => {
+    const { canvas, canvasContext, currentScene } = game;
+
+    canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+
+    currentScene.draw(gameTime);
+  };
+
+  const run = () => {
+    initialize();
+
+    game.previousFrameTime = performance.now();
+
+    gameLoop(0);
   };
 
   return {
     addCanvas,
     run,
   };
-};
-
-const update = (game) => {};
-
-const draw = (game) => {
-  const { canvas, canvasContext, puzzleGame } = game;
-
-  canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-
-  drawPillars(canvasContext, puzzleGame.puzzle.pillars);
 };
