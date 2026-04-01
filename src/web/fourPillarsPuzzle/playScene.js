@@ -21,8 +21,11 @@ import { createRenderDrawHandler } from "./handlers/renderDrawHandler";
 import { createRotationUpdateHandler } from "./handlers/rotationUpdateHandler";
 
 const PILLAR_RADIUS = 55;
-const PILLAR_OFFSET_X = 220;
-const PILLAR_OFFSET_Y = 120;
+const PILLARS_GAP_X = 220;
+const PILLARS_GAP_Y = 220;
+
+const TURN_BUTTON_SIZE = 46;
+const TURN_BUTTON_DISTANCE_FROM_CENTER = 86;
 
 const PILLAR_POSITION_MAP = {
   [POSITION_LEFT_TOP]: [0, 0],
@@ -30,12 +33,6 @@ const PILLAR_POSITION_MAP = {
   [POSITION_LEFT_BOTTOM]: [1, 0],
   [POSITION_RIGHT_BOTTOM]: [1, 1],
 };
-
-const PILLARS_GAP_X = 220;
-const PILLARS_GAP_Y = 170;
-
-const TURN_BUTTON_SIZE = 46;
-const TURN_BUTTON_DISTANCE_FROM_CENTER = 86;
 
 export const createPlayScene = (game) => {
   const scene = {
@@ -100,12 +97,14 @@ export const createPlayScene = (game) => {
 
       if (isIntersect && !uiPillarButton.isHover) {
         uiPillarButton.isHover = true;
+        game.canvas.style.cursor = "pointer";
 
         return;
       }
 
       if (!isIntersect && uiPillarButton.isHover) {
         uiPillarButton.isHover = false;
+        game.canvas.style.cursor = "default";
 
         return;
       }
@@ -161,14 +160,21 @@ export const createPlayScene = (game) => {
   };
 
   const createUiPillars = () => {
+    const pillarOffsetX =
+      (game.canvas.width - (PILLARS_GAP_X + PILLAR_RADIUS * 2)) / 2 +
+      PILLAR_RADIUS;
+    const pillarOffsetY =
+      (game.canvas.height - (PILLARS_GAP_Y + PILLAR_RADIUS * 2)) / 2 +
+      PILLAR_RADIUS;
+
     const uiPillars = puzzleGame.puzzle.pillars.map((pillar) => {
       const pillarMappedPosition = PILLAR_POSITION_MAP[pillar.position];
 
       const row = pillarMappedPosition[0];
       const col = pillarMappedPosition[1];
 
-      const centerX = PILLAR_OFFSET_X + col * PILLARS_GAP_X;
-      const centerY = PILLAR_OFFSET_Y + row * PILLARS_GAP_Y;
+      const centerX = pillarOffsetX + col * PILLARS_GAP_X;
+      const centerY = pillarOffsetY + row * PILLARS_GAP_Y;
 
       return createUiPillar(pillar.position, centerX, centerY, PILLAR_RADIUS);
     });
