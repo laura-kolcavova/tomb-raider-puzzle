@@ -11,7 +11,7 @@ const PILLAR_STROKE_WIDTH = 3;
 
 export const drawUiPillar = (context, puzzleGame, uiPillar) => {
   const {
-    pillarPosition,
+    position,
     centerX,
     centerY,
     radius,
@@ -20,7 +20,7 @@ export const drawUiPillar = (context, puzzleGame, uiPillar) => {
     rotateAnimationProgress,
   } = uiPillar;
 
-  const pillar = puzzleGame.getPillar(pillarPosition);
+  const pillar = puzzleGame.getPillar(position);
 
   const parts = pillar.parts[pillar.rotationState];
 

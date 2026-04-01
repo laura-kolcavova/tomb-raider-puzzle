@@ -58,6 +58,7 @@ export const createPuzzleGame = () => {
   return {
     puzzle,
     getPillar,
+    getConnectedPositions,
     rotatePillarClockwise,
     rotatePillarCounterClockwise,
   };

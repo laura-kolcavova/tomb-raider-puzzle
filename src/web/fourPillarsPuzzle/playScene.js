@@ -1,18 +1,24 @@
 import { createPuzzleGame } from "../../core/fourPillarsPuzzle/puzzleGame";
 import { loadContent } from "./contentManager";
-import { createUiPillar } from "./uiPillar";
+import {
+  createUiPillar,
+  startUiPillarClockwiseRotation,
+  startUiPillarCounterClockwiseRotation,
+} from "./uiPillar";
 import { createUiPillarButton } from "./uiPillarButton";
 import {
   arrowClockwiseImage,
   arrowCounterClockwiseImage,
 } from "./contentManager";
-import { drawUiPillar, drawUiPillarButton } from "./renderer";
 import {
   POSITION_LEFT_BOTTOM,
   POSITION_LEFT_TOP,
   POSITION_RIGHT_BOTTOM,
   POSITION_RIGHT_TOP,
 } from "../../core/fourPillarsPuzzle/puzzle";
+import { createAnimationUpdateHandler } from "./handlers/animationUpdateHandler";
+import { createRenderDrawHandler } from "./handlers/renderDrawHandler";
+import { createRotationUpdateHandler } from "./handlers/rotationUpdateHandler";
 
 const PILLAR_RADIUS = 55;
 const PILLAR_OFFSET_X = 220;
@@ -33,23 +39,40 @@ const TURN_BUTTON_DISTANCE_FROM_CENTER = 86;
 
 export const createPlayScene = (game) => {
   const scene = {
-    puzzleGame: null,
     uiPillars: [],
     uiPillarButtons: [],
-    pillarsAreRotating: false,
+    arePillarsRotating: false,
   };
+
+  const puzzleGame = createPuzzleGame();
+
+  const updateHandlers = [];
+
+  const drawHandlers = [];
 
   const initialize = () => {
     loadContent();
 
-    scene.puzzleGame = createPuzzleGame();
+    scene.uiPillars = createUiPillars();
 
-    scene.uiPillars = createUiPillars(scene.puzzleGame.puzzle.pillars);
+    scene.uiPillarButtons = createUiPillarButtons();
 
-    scene.uiPillarButtons = createUiPillarButtons(
-      scene.uiPillars,
-      scene.puzzleGame,
-    );
+    updateHandlers.push(createAnimationUpdateHandler(game, scene));
+    updateHandlers.push(createRotationUpdateHandler(game, scene, puzzleGame));
+
+    drawHandlers.push(createRenderDrawHandler(game, scene, puzzleGame));
+  };
+
+  const update = (gameTime) => {
+    updateHandlers.forEach((updateHandler) => {
+      updateHandler.handle(gameTime);
+    });
+  };
+
+  const draw = (gameTime) => {
+    drawHandlers.forEach((drawHandler) => {
+      drawHandler.handle(gameTime);
+    });
   };
 
   const handleClick = (x, y) => {
@@ -89,19 +112,131 @@ export const createPlayScene = (game) => {
     }
   };
 
-  const update = (gameTime) => {
-    if (scene.pillarsAreRotating) {
-      handleUiPillarRotation(gameTime, scene.uiPillars, scene.puzzleGame);
+  const rotateUiPillarClockwise = (uiPillar) => {
+    if (scene.arePillarsRotating) {
+      return;
     }
+
+    const connectedPositions = puzzleGame.getConnectedPositions(
+      uiPillar.position,
+    );
+
+    const slaveUiPillarA = scene.uiPillars.find(
+      (slaveUiPillar) => slaveUiPillar.position === connectedPositions[0],
+    );
+
+    const slaveUiPillarB = scene.uiPillars.find(
+      (slaveUiPillar) => slaveUiPillar.position === connectedPositions[1],
+    );
+
+    startUiPillarClockwiseRotation(uiPillar, true);
+    startUiPillarClockwiseRotation(slaveUiPillarA);
+    startUiPillarClockwiseRotation(slaveUiPillarB);
+
+    scene.arePillarsRotating = true;
   };
 
-  const draw = (gameTime) => {
-    if (scene.pillarsAreRotating) {
-      drawUiPillars(game.canvasContext, scene.puzzleGame, scene.uiPillars);
-      drawUiPillarButtons(game.canvasContext, scene.uiPillarButtons);
-    } else {
-      drawUiPillars(game.canvasContext, scene.puzzleGame, scene.uiPillars);
+  const rotateUiPillarCounterClockwise = (uiPillar) => {
+    if (scene.arePillarsRotating) {
+      return;
     }
+
+    const connectedPositions = puzzleGame.getConnectedPositions(
+      uiPillar.position,
+    );
+
+    const slaveUiPillarA = scene.uiPillars.find(
+      (slaveUiPillar) => slaveUiPillar.position === connectedPositions[0],
+    );
+
+    const slaveUiPillarB = scene.uiPillars.find(
+      (slaveUiPillar) => slaveUiPillar.position === connectedPositions[1],
+    );
+
+    startUiPillarCounterClockwiseRotation(uiPillar, true);
+    startUiPillarCounterClockwiseRotation(slaveUiPillarA);
+    startUiPillarCounterClockwiseRotation(slaveUiPillarB);
+
+    scene.arePillarsRotating = true;
+  };
+
+  const createUiPillars = () => {
+    const uiPillars = puzzleGame.puzzle.pillars.map((pillar) => {
+      const pillarMappedPosition = PILLAR_POSITION_MAP[pillar.position];
+
+      const row = pillarMappedPosition[0];
+      const col = pillarMappedPosition[1];
+
+      const centerX = PILLAR_OFFSET_X + col * PILLARS_GAP_X;
+      const centerY = PILLAR_OFFSET_Y + row * PILLARS_GAP_Y;
+
+      return createUiPillar(pillar.position, centerX, centerY, PILLAR_RADIUS);
+    });
+
+    return uiPillars;
+  };
+
+  const createUiPillarButtons = () => {
+    const uiPillarButtons = [];
+
+    scene.uiPillars.forEach((uiPillar) => {
+      const turnClockwiseButton = createTurnClockwiseButton(uiPillar);
+
+      const turnCounterClockwiseButton =
+        createTurnCounterClockwiseButton(uiPillar);
+
+      uiPillarButtons.push(turnClockwiseButton);
+      uiPillarButtons.push(turnCounterClockwiseButton);
+    });
+
+    return uiPillarButtons;
+  };
+
+  const createTurnClockwiseButton = (uiPillar) => {
+    const pillarAngle = -Math.PI / 4;
+
+    const centerX =
+      uiPillar.centerX +
+      Math.cos(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
+    const centerY =
+      uiPillar.centerY +
+      Math.sin(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
+
+    const rotate = -(45 * Math.PI) / 180;
+
+    return createUiPillarButton(
+      centerX,
+      centerY,
+      TURN_BUTTON_SIZE,
+      TURN_BUTTON_SIZE,
+      arrowClockwiseImage,
+      rotate,
+      () => rotateUiPillarClockwise(uiPillar),
+    );
+  };
+
+  const createTurnCounterClockwiseButton = (uiPillar, puzzleGame) => {
+    const pillarAngle = -Math.PI + Math.PI / 4;
+
+    const centerX =
+      uiPillar.centerX +
+      Math.cos(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
+
+    const centerY =
+      uiPillar.centerY +
+      Math.sin(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
+
+    const rotate = (45 * Math.PI) / 180;
+
+    return createUiPillarButton(
+      centerX,
+      centerY,
+      TURN_BUTTON_SIZE,
+      TURN_BUTTON_SIZE,
+      arrowCounterClockwiseImage,
+      rotate,
+      () => rotateUiPillarCounterClockwise(uiPillar),
+    );
   };
 
   return {
@@ -111,88 +246,4 @@ export const createPlayScene = (game) => {
     handleClick,
     handleMouseMove,
   };
-};
-
-const createUiPillars = (pillars) => {
-  const uiPillars = pillars.map((pillar) => {
-    const pillarMappedPosition = PILLAR_POSITION_MAP[pillar.position];
-
-    const row = pillarMappedPosition[0];
-    const col = pillarMappedPosition[1];
-
-    const centerX = PILLAR_OFFSET_X + col * PILLARS_GAP_X;
-    const centerY = PILLAR_OFFSET_Y + row * PILLARS_GAP_Y;
-
-    return createUiPillar(pillar.position, centerX, centerY, PILLAR_RADIUS);
-  });
-
-  return uiPillars;
-};
-
-const createUiPillarButtons = (uiPillars, puzzleGame) => {
-  const uiPillarButtons = [];
-
-  uiPillars.forEach((uiPillar) => {
-    const turnClockwiseButton = createTurnClockwiseButton(uiPillar, puzzleGame);
-    const turnCounterClockwiseButton = createTurnCounterClockwiseButton(
-      uiPillar,
-      puzzleGame,
-    );
-
-    uiPillarButtons.push(turnClockwiseButton);
-    uiPillarButtons.push(turnCounterClockwiseButton);
-  });
-
-  return uiPillarButtons;
-};
-
-const createTurnClockwiseButton = (uiPillar) => {
-  const pillarAngle = -Math.PI / 4;
-
-  const centerX =
-    uiPillar.centerX + Math.cos(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
-  const centerY =
-    uiPillar.centerY + Math.sin(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
-
-  const rotate = -(45 * Math.PI) / 180;
-
-  const onClick = () => {
-    startUiPillarClockwiseRotation(uiPillar);
-  };
-
-  return createUiPillarButton(
-    centerX,
-    centerY,
-    TURN_BUTTON_SIZE,
-    TURN_BUTTON_SIZE,
-    arrowClockwiseImage,
-    rotate,
-    onClick,
-  );
-};
-
-const createTurnCounterClockwiseButton = (uiPillar, puzzleGame) => {
-  const pillarAngle = -Math.PI + Math.PI / 4;
-
-  const centerX =
-    uiPillar.centerX + Math.cos(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
-
-  const centerY =
-    uiPillar.centerY + Math.sin(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
-
-  const rotate = (45 * Math.PI) / 180;
-
-  const onClick = () => {
-    startUiPillarCounterClockwiseRotation(uiPillar);
-  };
-
-  return createUiPillarButton(
-    centerX,
-    centerY,
-    TURN_BUTTON_SIZE,
-    TURN_BUTTON_SIZE,
-    arrowCounterClockwiseImage,
-    rotate,
-    onClick,
-  );
 };
