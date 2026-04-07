@@ -1,4 +1,9 @@
-import { createPillar } from "./pillar";
+import { randomBetween } from "../random";
+import {
+  createPillar,
+  PILLAR_END_ROTATION_STATE,
+  PILLAR_INITIAL_ROTATION_STATE,
+} from "./pillar";
 
 export const POSITION_LEFT_TOP = 0;
 export const POSITION_RIGHT_TOP = 1;
@@ -10,7 +15,9 @@ export const createPuzzle = () => {
 
   puzzle.isSolved = false;
 
-  puzzle.pillars = initializePillars();
+  puzzle.solveState = [0, 0, 0, 0];
+
+  puzzle.pillars = initializePillars([0, 0, 0, 0]);
 
   puzzle.connectedPositions = initializeConnectedPositions();
 
@@ -50,16 +57,56 @@ export const createPuzzle = () => {
     slavePillarB.rotateCounterClockwise();
   };
 
+  puzzle.shufflePillars = () => {
+    puzzle.pillars.forEach((pillar) => {
+      const newRotationState = randomBetween(
+        PILLAR_INITIAL_ROTATION_STATE,
+        PILLAR_END_ROTATION_STATE,
+      );
+
+      pillar.setRotationState(newRotationState);
+    });
+  };
+
+  puzzle.setRandomSolveState = () => {
+    const firstRotationState = randomBetween(
+      PILLAR_INITIAL_ROTATION_STATE,
+      PILLAR_END_ROTATION_STATE,
+    );
+
+    const secondRotationState =
+      (firstRotationState + 2) % (PILLAR_END_ROTATION_STATE + 1);
+
+    puzzle.solveState = [
+      firstRotationState,
+      secondRotationState,
+      secondRotationState,
+      firstRotationState,
+    ];
+  };
+
   return puzzle;
 };
 
-const initializePillars = () => {
+const initializePillars = (initialState) => {
   const pillars = [];
 
-  pillars[POSITION_LEFT_TOP] = createPillar(POSITION_LEFT_TOP);
-  pillars[POSITION_RIGHT_TOP] = createPillar(POSITION_RIGHT_TOP);
-  pillars[POSITION_LEFT_BOTTOM] = createPillar(POSITION_LEFT_BOTTOM);
-  pillars[POSITION_RIGHT_BOTTOM] = createPillar(POSITION_RIGHT_BOTTOM);
+  pillars[POSITION_LEFT_TOP] = createPillar(POSITION_LEFT_TOP, initialState[0]);
+
+  pillars[POSITION_RIGHT_TOP] = createPillar(
+    POSITION_RIGHT_TOP,
+    initialState[1],
+  );
+
+  pillars[POSITION_LEFT_BOTTOM] = createPillar(
+    POSITION_LEFT_BOTTOM,
+    initialState[2],
+  );
+
+  pillars[POSITION_RIGHT_BOTTOM] = createPillar(
+    POSITION_RIGHT_BOTTOM,
+    initialState[3],
+  );
 
   return pillars;
 };

@@ -43,6 +43,8 @@ export const createPlayScene = (game) => {
 
   const puzzle = createPuzzle();
 
+  puzzle.shufflePillars();
+
   const updateHandlers = [];
 
   const drawHandlers = [];
