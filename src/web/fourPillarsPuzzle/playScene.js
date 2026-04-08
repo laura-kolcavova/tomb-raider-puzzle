@@ -19,6 +19,7 @@ import {
 import { createAnimationUpdateHandler } from "./handlers/animationUpdateHandler";
 import { createRenderDrawHandler } from "./handlers/renderDrawHandler";
 import { createRotationUpdateHandler } from "./handlers/rotationUpdateHandler";
+import { getPlayAgainButtonBounds } from "./renderers/solvedOverlayRenderer";
 
 const PILLAR_RADIUS = 55;
 const PILLARS_GAP_X = 220;
@@ -34,11 +35,16 @@ const PILLAR_POSITION_MAP = {
   [POSITION_RIGHT_BOTTOM]: [1, 1],
 };
 
+export const ACTION_IDLE = "IDLE";
+export const ACTION_ROTATING = "ROTATING";
+export const ACTION_SOLVED = "SOLVED";
+
 export const createPlayScene = (game) => {
   const scene = {
     uiPillars: [],
     uiPillarButtons: [],
-    arePillarsRotating: false,
+    action: ACTION_SOLVED,
+    isPlayAgainHover: false,
   };
 
   const puzzle = createPuzzle();
@@ -75,7 +81,35 @@ export const createPlayScene = (game) => {
     });
   };
 
+  const restart = () => {
+    puzzle.shufflePillars();
+    puzzle.setRandomSolveState();
+
+    scene.uiPillars.forEach((uiPillar) => {
+      uiPillar.isRotateMaster = false;
+      uiPillar.isRotatingClockwise = false;
+      uiPillar.isRotatingCounterClockwise = false;
+      uiPillar.rotateAnimationProgress = 0;
+    });
+
+    scene.action = ACTION_IDLE;
+    scene.isPlayAgainHover = false;
+  };
+
   const handleClick = (x, y) => {
+    if (scene.action === ACTION_SOLVED) {
+      const bounds = getPlayAgainButtonBounds(game.canvas);
+      if (
+        x >= bounds.left &&
+        x <= bounds.right &&
+        y >= bounds.top &&
+        y <= bounds.bottom
+      ) {
+        restart();
+      }
+      return;
+    }
+
     for (const uiPillarButton of scene.uiPillarButtons) {
       if (
         x >= uiPillarButton.left &&
@@ -91,6 +125,20 @@ export const createPlayScene = (game) => {
   };
 
   const handleMouseMove = (x, y) => {
+    if (scene.action === ACTION_SOLVED) {
+      const bounds = getPlayAgainButtonBounds(game.canvas);
+      const isIntersect =
+        x >= bounds.left &&
+        x <= bounds.right &&
+        y >= bounds.top &&
+        y <= bounds.bottom;
+      if (isIntersect !== scene.isPlayAgainHover) {
+        scene.isPlayAgainHover = isIntersect;
+        game.canvas.style.cursor = isIntersect ? "pointer" : "default";
+      }
+      return;
+    }
+
     for (const uiPillarButton of scene.uiPillarButtons) {
       const isIntersect =
         x >= uiPillarButton.left &&
@@ -115,7 +163,7 @@ export const createPlayScene = (game) => {
   };
 
   const rotateUiPillarClockwise = (uiPillar) => {
-    if (scene.arePillarsRotating) {
+    if (scene.action !== ACTION_IDLE) {
       return;
     }
 
@@ -133,11 +181,11 @@ export const createPlayScene = (game) => {
     startUiPillarClockwiseRotation(slaveUiPillarA);
     startUiPillarClockwiseRotation(slaveUiPillarB);
 
-    scene.arePillarsRotating = true;
+    scene.action = ACTION_ROTATING;
   };
 
   const rotateUiPillarCounterClockwise = (uiPillar) => {
-    if (scene.arePillarsRotating) {
+    if (scene.action !== ACTION_IDLE) {
       return;
     }
 
@@ -155,7 +203,7 @@ export const createPlayScene = (game) => {
     startUiPillarCounterClockwiseRotation(slaveUiPillarA);
     startUiPillarCounterClockwiseRotation(slaveUiPillarB);
 
-    scene.arePillarsRotating = true;
+    scene.action = ACTION_ROTATING;
   };
 
   const createUiPillars = () => {

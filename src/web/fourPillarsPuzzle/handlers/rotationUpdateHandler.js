@@ -1,3 +1,4 @@
+import { ACTION_IDLE, ACTION_ROTATING, ACTION_SOLVED } from "../playScene";
 import {
   endUiPillarClockwiseRotation,
   endUiPillarCounterClockwiseRotation,
@@ -5,7 +6,7 @@ import {
 
 export const createRotationUpdateHandler = (game, scene, puzzle) => {
   const handle = (gameTime) => {
-    if (!scene.arePillarsRotating) {
+    if (scene.action !== ACTION_ROTATING) {
       return;
     }
 
@@ -43,7 +44,8 @@ export const createRotationUpdateHandler = (game, scene, puzzle) => {
 
     if (allPillarsRotated) {
       puzzle.rotatePillarClockwise(masterUiPillar.position);
-      scene.arePillarsRotating = false;
+
+      scene.action = puzzle.checkIsSolved() ? ACTION_SOLVED : ACTION_IDLE;
     }
   };
 
@@ -64,7 +66,8 @@ export const createRotationUpdateHandler = (game, scene, puzzle) => {
 
     if (allPillarsRotated) {
       puzzle.rotatePillarCounterClockwise(masterUiPillar.position);
-      scene.arePillarsRotating = false;
+
+      scene.action = puzzle.checkIsSolved() ? ACTION_SOLVED : ACTION_IDLE;
     }
   };
 
