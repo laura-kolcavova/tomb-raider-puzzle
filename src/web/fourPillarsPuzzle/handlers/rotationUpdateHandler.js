@@ -3,7 +3,7 @@ import {
   endUiPillarCounterClockwiseRotation,
 } from "../uiPillar";
 
-export const createRotationUpdateHandler = (game, scene, puzzleGame) => {
+export const createRotationUpdateHandler = (game, scene, puzzle) => {
   const handle = (gameTime) => {
     if (!scene.arePillarsRotating) {
       return;
@@ -42,7 +42,7 @@ export const createRotationUpdateHandler = (game, scene, puzzleGame) => {
     });
 
     if (allPillarsRotated) {
-      puzzleGame.rotatePillarClockwise(masterUiPillar.position);
+      puzzle.rotatePillarClockwise(masterUiPillar.position);
       scene.arePillarsRotating = false;
     }
   };
@@ -63,7 +63,7 @@ export const createRotationUpdateHandler = (game, scene, puzzleGame) => {
     });
 
     if (allPillarsRotated) {
-      puzzleGame.rotatePillarCounterClockwise(masterUiPillar.position);
+      puzzle.rotatePillarCounterClockwise(masterUiPillar.position);
       scene.arePillarsRotating = false;
     }
   };

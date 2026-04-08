@@ -1,4 +1,3 @@
-import { createPuzzleGame } from "../../core/fourPillarsPuzzle/puzzleGame";
 import { loadContent } from "./contentManager";
 import {
   createUiPillar,
@@ -11,6 +10,7 @@ import {
   arrowCounterClockwiseImage,
 } from "./contentManager";
 import {
+  createPuzzle,
   POSITION_LEFT_BOTTOM,
   POSITION_LEFT_TOP,
   POSITION_RIGHT_BOTTOM,
@@ -41,7 +41,10 @@ export const createPlayScene = (game) => {
     arePillarsRotating: false,
   };
 
-  const puzzleGame = createPuzzleGame();
+  const puzzle = createPuzzle();
+
+  puzzle.shufflePillars();
+  puzzle.setRandomSolveState();
 
   const updateHandlers = [];
 
@@ -55,9 +58,9 @@ export const createPlayScene = (game) => {
     scene.uiPillarButtons = createUiPillarButtons();
 
     updateHandlers.push(createAnimationUpdateHandler(game, scene));
-    updateHandlers.push(createRotationUpdateHandler(game, scene, puzzleGame));
+    updateHandlers.push(createRotationUpdateHandler(game, scene, puzzle));
 
-    drawHandlers.push(createRenderDrawHandler(game, scene, puzzleGame));
+    drawHandlers.push(createRenderDrawHandler(game, scene, puzzle));
   };
 
   const update = (gameTime) => {
@@ -116,9 +119,7 @@ export const createPlayScene = (game) => {
       return;
     }
 
-    const connectedPositions = puzzleGame.getConnectedPositions(
-      uiPillar.position,
-    );
+    const connectedPositions = puzzle.getConnectedPositions(uiPillar.position);
 
     const slaveUiPillarA = scene.uiPillars.find(
       (slaveUiPillar) => slaveUiPillar.position === connectedPositions[0],
@@ -140,9 +141,7 @@ export const createPlayScene = (game) => {
       return;
     }
 
-    const connectedPositions = puzzleGame.getConnectedPositions(
-      uiPillar.position,
-    );
+    const connectedPositions = puzzle.getConnectedPositions(uiPillar.position);
 
     const slaveUiPillarA = scene.uiPillars.find(
       (slaveUiPillar) => slaveUiPillar.position === connectedPositions[0],
@@ -167,7 +166,7 @@ export const createPlayScene = (game) => {
       (game.canvas.height - (PILLARS_GAP_Y + PILLAR_RADIUS * 2)) / 2 +
       PILLAR_RADIUS;
 
-    const uiPillars = puzzleGame.puzzle.pillars.map((pillar) => {
+    const uiPillars = puzzle.pillars.map((pillar) => {
       const pillarMappedPosition = PILLAR_POSITION_MAP[pillar.position];
 
       const row = pillarMappedPosition[0];
@@ -221,7 +220,7 @@ export const createPlayScene = (game) => {
     );
   };
 
-  const createTurnCounterClockwiseButton = (uiPillar, puzzleGame) => {
+  const createTurnCounterClockwiseButton = (uiPillar, puzzle) => {
     const pillarAngle = -Math.PI + Math.PI / 4;
 
     const centerX =

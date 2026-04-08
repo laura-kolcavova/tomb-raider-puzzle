@@ -5,13 +5,21 @@ const PILLAR_PART_COLORS = [
   "#facc15", // yellow
 ];
 
+const PILLAR_PART_ANGLES = [
+  [-Math.PI, -Math.PI / 2], // green
+  [-Math.PI / 2, 0], // blue
+  [0, Math.PI / 2], // red
+  [Math.PI / 2, Math.PI], // yellow
+];
+
+const PILLAR_OFFSET_ANGLE = Math.PI / 4;
+
 const PILLAR_STROKE_COLOR = "#111827";
 
 const PILLAR_STROKE_WIDTH = 3;
 
-export const drawUiPillar = (context, puzzleGame, uiPillar) => {
+export const drawUiPillar = (context, uiPillar, rotationState) => {
   const {
-    position,
     centerX,
     centerY,
     radius,
@@ -20,42 +28,35 @@ export const drawUiPillar = (context, puzzleGame, uiPillar) => {
     rotateAnimationProgress,
   } = uiPillar;
 
-  const pillar = puzzleGame.getPillar(position);
+  const baseAngle = rotationState * (Math.PI / 2);
 
-  const parts = pillar.parts[pillar.rotationState];
+  console.log(rotationState);
 
-  const quarterAngles = [
-    [-Math.PI, -Math.PI / 2],
-    [-Math.PI / 2, 0],
-    [0, Math.PI / 2],
-    [Math.PI / 2, Math.PI],
-  ];
-
-  const offsetAngle = Math.PI / 4;
-
-  let rotateAngle = 0;
+  let animationAngle;
 
   if (isRotatingClockwise) {
-    rotateAngle = rotateAnimationProgress * (Math.PI / 2);
+    animationAngle = +rotateAnimationProgress * (Math.PI / 2);
   } else if (isRotatingCounterClockwise) {
-    rotateAngle = -rotateAnimationProgress * (Math.PI / 2);
+    animationAngle = -rotateAnimationProgress * (Math.PI / 2);
+  } else {
+    animationAngle = 0;
   }
 
-  quarterAngles.forEach(([startAngle, endAngle], index) => {
-    const partValue = parts[index];
+  const rotateAngle = baseAngle + animationAngle + PILLAR_OFFSET_ANGLE;
 
+  PILLAR_PART_ANGLES.forEach(([startAngle, endAngle], index) => {
     context.beginPath();
     context.moveTo(centerX, centerY);
     context.arc(
       centerX,
       centerY,
       radius,
-      startAngle + offsetAngle + rotateAngle,
-      endAngle + offsetAngle + rotateAngle,
+      startAngle + rotateAngle,
+      endAngle + rotateAngle,
     );
     context.closePath();
 
-    context.fillStyle = PILLAR_PART_COLORS[partValue];
+    context.fillStyle = PILLAR_PART_COLORS[index];
     context.fill();
   });
 
