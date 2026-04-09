@@ -19,11 +19,10 @@ export const createGameApp = () => {
   };
 
   const addCanvas = (canvasId) => {
-    game.canvas = document.getElementById(canvasId);
-    game.canvasContext = game.canvas.getContext("2d");
+    const canvas = document.getElementById(canvasId);
 
-    game.canvas.addEventListener("click", (event) => {
-      const rect = game.canvas.getBoundingClientRect();
+    canvas.addEventListener("click", (event) => {
+      const rect = canvas.getBoundingClientRect();
 
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
@@ -31,14 +30,17 @@ export const createGameApp = () => {
       game.currentScene?.handleClick(x, y);
     });
 
-    game.canvas.addEventListener("mousemove", (event) => {
-      const rect = game.canvas.getBoundingClientRect();
+    canvas.addEventListener("mousemove", (event) => {
+      const rect = canvas.getBoundingClientRect();
 
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
 
       game.currentScene?.handleMouseMove(x, y);
     });
+
+    game.canvas = canvas;
+    game.canvasContext = canvas.getContext("2d");
   };
 
   const initialize = () => {

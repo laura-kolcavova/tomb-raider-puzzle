@@ -1,7 +1,3 @@
-const PLAY_AGAIN_BUTTON_WIDTH = 160;
-const PLAY_AGAIN_BUTTON_HEIGHT = 44;
-const PLAY_AGAIN_BUTTON_Y_RATIO = 0.62;
-
 export const getPlayAgainButtonBounds = (canvas) => {
   const centerX = canvas.width / 2;
   const centerY = canvas.height * PLAY_AGAIN_BUTTON_Y_RATIO;

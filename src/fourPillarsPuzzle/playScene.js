@@ -20,6 +20,7 @@ import { createAnimationUpdateHandler } from "./handlers/animationUpdateHandler"
 import { createRenderDrawHandler } from "./handlers/renderDrawHandler";
 import { createRotationUpdateHandler } from "./handlers/rotationUpdateHandler";
 import { getPlayAgainButtonBounds } from "./renderers/solvedOverlayRenderer";
+import { createUiButton } from "./controls/uiButton";
 
 const PILLAR_RADIUS = 55;
 const PILLARS_GAP_X = 220;
@@ -27,6 +28,10 @@ const PILLARS_GAP_Y = 220;
 
 const TURN_BUTTON_SIZE = 46;
 const TURN_BUTTON_DISTANCE_FROM_CENTER = 86;
+
+const PLAY_AGAIN_BUTTON_WIDTH = 160;
+const PLAY_AGAIN_BUTTON_HEIGHT = 44;
+const PLAY_AGAIN_BUTTON_Y_RATIO = 0.62;
 
 const PILLAR_POSITION_MAP = {
   [POSITION_LEFT_TOP]: [0, 0],
@@ -40,17 +45,9 @@ export const ACTION_ROTATING = "ROTATING";
 export const ACTION_SOLVED = "SOLVED";
 
 export const createPlayScene = (game) => {
-  const scene = {
-    uiPillars: [],
-    uiPillarButtons: [],
-    action: ACTION_SOLVED,
-    isPlayAgainHover: false,
-  };
+  const scene = {};
 
   const puzzle = createPuzzle();
-
-  puzzle.shufflePillars();
-  puzzle.setRandomSolveState();
 
   const updateHandlers = [];
 
@@ -62,6 +59,13 @@ export const createPlayScene = (game) => {
     scene.uiPillars = createUiPillars();
 
     scene.uiPillarButtons = createUiPillarButtons();
+
+    scene.uiPlayAggainButton = createUiPlayAgainButton();
+
+    scene.action = ACTION_SOLVED;
+
+    puzzle.shufflePillars();
+    puzzle.setRandomSolveState();
 
     updateHandlers.push(createAnimationUpdateHandler(game, scene));
     updateHandlers.push(createRotationUpdateHandler(game, scene, puzzle));
@@ -98,25 +102,27 @@ export const createPlayScene = (game) => {
 
   const handleClick = (x, y) => {
     if (scene.action === ACTION_SOLVED) {
-      const bounds = getPlayAgainButtonBounds(game.canvas);
-      if (
-        x >= bounds.left &&
-        x <= bounds.right &&
-        y >= bounds.top &&
-        y <= bounds.bottom
-      ) {
-        restart();
+      const isIntersect =
+        x >= scene.uiPlayAggainButton.left &&
+        x <= scene.uiPlayAggainButton.right &&
+        y >= scene.uiPlayAggainButton.top &&
+        y <= scene.uiPlayAggainButton.bottom;
+
+      if (isIntersect) {
+        scene.uiPlayAggainButton.onClick?.();
       }
+
       return;
     }
 
     for (const uiPillarButton of scene.uiPillarButtons) {
-      if (
+      const isIntersect =
         x >= uiPillarButton.left &&
         x <= uiPillarButton.right &&
         y >= uiPillarButton.top &&
-        y <= uiPillarButton.bottom
-      ) {
+        y <= uiPillarButton.bottom;
+
+      if (isIntersect) {
         uiPillarButton.onClick?.();
 
         return;
@@ -126,15 +132,26 @@ export const createPlayScene = (game) => {
 
   const handleMouseMove = (x, y) => {
     if (scene.action === ACTION_SOLVED) {
-      const bounds = getPlayAgainButtonBounds(game.canvas);
       const isIntersect =
-        x >= bounds.left &&
-        x <= bounds.right &&
-        y >= bounds.top &&
-        y <= bounds.bottom;
-      if (isIntersect !== scene.isPlayAgainHover) {
-        scene.isPlayAgainHover = isIntersect;
-        game.canvas.style.cursor = isIntersect ? "pointer" : "default";
+        x >= scene.uiPlayAggainButton.left &&
+        x <= scene.uiPlayAggainButton.right &&
+        y >= scene.uiPlayAggainButton.top &&
+        y <= scene.uiPlayAggainButton.bottom;
+
+      if (isIntersect && !scene.uiPillarButton.isHover) {
+        scene.uiPillarButton.isHover = true;
+
+        game.canvas.style.cursor = "pointer";
+
+        return;
+      }
+
+      if (!isIntersect && scene.uiPillarButton.isHover) {
+        scene.uiPillarButton.isHover = false;
+
+        game.canvas.style.cursor = "default";
+
+        return;
       }
       return;
     }
@@ -148,6 +165,7 @@ export const createPlayScene = (game) => {
 
       if (isIntersect && !uiPillarButton.isHover) {
         uiPillarButton.isHover = true;
+
         game.canvas.style.cursor = "pointer";
 
         return;
@@ -155,6 +173,7 @@ export const createPlayScene = (game) => {
 
       if (!isIntersect && uiPillarButton.isHover) {
         uiPillarButton.isHover = false;
+
         game.canvas.style.cursor = "default";
 
         return;
@@ -289,6 +308,21 @@ export const createPlayScene = (game) => {
       arrowCounterClockwiseImage,
       rotate,
       () => rotateUiPillarCounterClockwise(uiPillar),
+    );
+  };
+
+  const createUiPlayAgainButton = () => {
+    const centerX = game.canvas.width / 2;
+    const centerY = game.canvas.height * PLAY_AGAIN_BUTTON_Y_RATIO;
+
+    return createUiButton(
+      centerX,
+      centerY,
+      PLAY_AGAIN_BUTTON_WIDTH,
+      PLAY_AGAIN_BUTTON_HEIGHT,
+      () => {
+        game.restart();
+      },
     );
   };
 
