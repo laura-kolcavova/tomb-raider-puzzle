@@ -37,7 +37,7 @@ const drawTitle = (canvasContext) => {
   const { width, height } = canvas;
 
   canvasContext.fillStyle = "#ffffff";
-  canvasContext.font = "bold 38px 'Comic Sans MS', 'Comic Sans', serif";
+  canvasContext.font = "700 38px 'Play', sans-serif";
   canvasContext.textAlign = "center";
   canvasContext.textBaseline = "middle";
   canvasContext.fillText("Puzzle Solved!", width / 2, height * 0.38);
@@ -47,7 +47,7 @@ const drawSubTitle = (canvasContext) => {
   const { canvas } = canvasContext;
   const { width, height } = canvas;
 
-  canvasContext.font = "20px 'Comic Sans MS', 'Comic Sans', serif";
+  canvasContext.font = "400 20px 'Play', sans-serif";
   canvasContext.fillStyle = "#d1fae5";
   canvasContext.fillText("All pillars are aligned.", width / 2, height * 0.5);
 };
@@ -70,7 +70,7 @@ const drawPlayAgainButton = (canvasContext, isPlayAgainHover) => {
   canvasContext.fill();
 
   canvasContext.fillStyle = "#ffffff";
-  canvasContext.font = "bold 18px 'Comic Sans MS', 'Comic Sans', serif";
+  canvasContext.font = "700 18px 'Play', sans-serif";
   canvasContext.fillText(
     "Play Again",
     width / 2,

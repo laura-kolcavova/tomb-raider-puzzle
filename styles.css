@@ -1,3 +1,17 @@
+@font-face {
+  font-family: "Play";
+  src: url("fonts/Play-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Play";
+  src: url("fonts/Play-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -10,7 +24,6 @@ body {
   align-items: center;
   min-height: 100vh;
   background-color: #282a36;
-  font-family: Arial, sans-serif;
 }
 
 #gameCanvas {

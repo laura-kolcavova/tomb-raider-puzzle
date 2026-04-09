@@ -3,7 +3,7 @@ import {
   POSITION_LEFT_TOP,
   POSITION_RIGHT_BOTTOM,
   POSITION_RIGHT_TOP,
-} from "../../../core/fourPillarsPuzzle/puzzle";
+} from "../../core/fourPillarsPuzzle/puzzle";
 
 const PILLAR_PART_COLORS = [
   "#16a34a", // green

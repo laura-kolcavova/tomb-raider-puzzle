@@ -15,7 +15,7 @@ import {
   POSITION_LEFT_TOP,
   POSITION_RIGHT_BOTTOM,
   POSITION_RIGHT_TOP,
-} from "../../core/fourPillarsPuzzle/puzzle";
+} from "../core/fourPillarsPuzzle/puzzle";
 import { createAnimationUpdateHandler } from "./handlers/animationUpdateHandler";
 import { createRenderDrawHandler } from "./handlers/renderDrawHandler";
 import { createRotationUpdateHandler } from "./handlers/rotationUpdateHandler";
