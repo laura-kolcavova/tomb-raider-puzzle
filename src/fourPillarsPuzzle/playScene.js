@@ -3,8 +3,8 @@ import {
   createUiPillar,
   startUiPillarClockwiseRotation,
   startUiPillarCounterClockwiseRotation,
-} from "./uiPillar";
-import { createUiPillarButton } from "./uiPillarButton";
+} from "./controls/uiPillar";
+import { createUiPillarButton } from "./controls/uiPillarButton";
 import {
   arrowClockwiseImage,
   arrowCounterClockwiseImage,
@@ -15,10 +15,11 @@ import {
   POSITION_LEFT_TOP,
   POSITION_RIGHT_BOTTOM,
   POSITION_RIGHT_TOP,
-} from "../../core/fourPillarsPuzzle/puzzle";
+} from "../core/fourPillarsPuzzle/puzzle";
 import { createAnimationUpdateHandler } from "./handlers/animationUpdateHandler";
 import { createRenderDrawHandler } from "./handlers/renderDrawHandler";
 import { createRotationUpdateHandler } from "./handlers/rotationUpdateHandler";
+import { createUiButton } from "./controls/uiButton";
 
 const PILLAR_RADIUS = 55;
 const PILLARS_GAP_X = 220;
@@ -27,6 +28,10 @@ const PILLARS_GAP_Y = 220;
 const TURN_BUTTON_SIZE = 46;
 const TURN_BUTTON_DISTANCE_FROM_CENTER = 86;
 
+const PLAY_AGAIN_BUTTON_WIDTH = 160;
+const PLAY_AGAIN_BUTTON_HEIGHT = 44;
+const PLAY_AGAIN_BUTTON_Y_RATIO = 0.62;
+
 const PILLAR_POSITION_MAP = {
   [POSITION_LEFT_TOP]: [0, 0],
   [POSITION_RIGHT_TOP]: [0, 1],
@@ -34,17 +39,14 @@ const PILLAR_POSITION_MAP = {
   [POSITION_RIGHT_BOTTOM]: [1, 1],
 };
 
+export const ACTION_IDLE = "IDLE";
+export const ACTION_ROTATING = "ROTATING";
+export const ACTION_SOLVED = "SOLVED";
+
 export const createPlayScene = (game) => {
-  const scene = {
-    uiPillars: [],
-    uiPillarButtons: [],
-    arePillarsRotating: false,
-  };
+  const scene = {};
 
   const puzzle = createPuzzle();
-
-  puzzle.shufflePillars();
-  puzzle.setRandomSolveState();
 
   const updateHandlers = [];
 
@@ -56,6 +58,13 @@ export const createPlayScene = (game) => {
     scene.uiPillars = createUiPillars();
 
     scene.uiPillarButtons = createUiPillarButtons();
+
+    scene.uiPlayAgainButton = createUiPlayAgainButton();
+
+    scene.action = ACTION_IDLE;
+
+    puzzle.shufflePillars();
+    puzzle.setRandomSolveState();
 
     updateHandlers.push(createAnimationUpdateHandler(game, scene));
     updateHandlers.push(createRotationUpdateHandler(game, scene, puzzle));
@@ -75,14 +84,43 @@ export const createPlayScene = (game) => {
     });
   };
 
+  const restart = () => {
+    puzzle.shufflePillars();
+    puzzle.setRandomSolveState();
+
+    scene.uiPillars.forEach((uiPillar) => {
+      uiPillar.isRotateMaster = false;
+      uiPillar.isRotatingClockwise = false;
+      uiPillar.isRotatingCounterClockwise = false;
+      uiPillar.rotateAnimationProgress = 0;
+    });
+
+    scene.action = ACTION_IDLE;
+  };
+
   const handleClick = (x, y) => {
+    if (scene.action === ACTION_SOLVED) {
+      const isIntersect =
+        x >= scene.uiPlayAgainButton.left &&
+        x <= scene.uiPlayAgainButton.right &&
+        y >= scene.uiPlayAgainButton.top &&
+        y <= scene.uiPlayAgainButton.bottom;
+
+      if (isIntersect) {
+        scene.uiPlayAgainButton.onClick?.();
+      }
+
+      return;
+    }
+
     for (const uiPillarButton of scene.uiPillarButtons) {
-      if (
+      const isIntersect =
         x >= uiPillarButton.left &&
         x <= uiPillarButton.right &&
         y >= uiPillarButton.top &&
-        y <= uiPillarButton.bottom
-      ) {
+        y <= uiPillarButton.bottom;
+
+      if (isIntersect) {
         uiPillarButton.onClick?.();
 
         return;
@@ -91,6 +129,31 @@ export const createPlayScene = (game) => {
   };
 
   const handleMouseMove = (x, y) => {
+    if (scene.action === ACTION_SOLVED) {
+      const isIntersect =
+        x >= scene.uiPlayAgainButton.left &&
+        x <= scene.uiPlayAgainButton.right &&
+        y >= scene.uiPlayAgainButton.top &&
+        y <= scene.uiPlayAgainButton.bottom;
+
+      if (isIntersect && !scene.uiPlayAgainButton.isHover) {
+        scene.uiPlayAgainButton.isHover = true;
+
+        game.canvas.style.cursor = "pointer";
+
+        return;
+      }
+
+      if (!isIntersect && scene.uiPlayAgainButton.isHover) {
+        scene.uiPlayAgainButton.isHover = false;
+
+        game.canvas.style.cursor = "default";
+
+        return;
+      }
+      return;
+    }
+
     for (const uiPillarButton of scene.uiPillarButtons) {
       const isIntersect =
         x >= uiPillarButton.left &&
@@ -100,6 +163,7 @@ export const createPlayScene = (game) => {
 
       if (isIntersect && !uiPillarButton.isHover) {
         uiPillarButton.isHover = true;
+
         game.canvas.style.cursor = "pointer";
 
         return;
@@ -107,6 +171,7 @@ export const createPlayScene = (game) => {
 
       if (!isIntersect && uiPillarButton.isHover) {
         uiPillarButton.isHover = false;
+
         game.canvas.style.cursor = "default";
 
         return;
@@ -115,7 +180,7 @@ export const createPlayScene = (game) => {
   };
 
   const rotateUiPillarClockwise = (uiPillar) => {
-    if (scene.arePillarsRotating) {
+    if (scene.action !== ACTION_IDLE) {
       return;
     }
 
@@ -133,11 +198,11 @@ export const createPlayScene = (game) => {
     startUiPillarClockwiseRotation(slaveUiPillarA);
     startUiPillarClockwiseRotation(slaveUiPillarB);
 
-    scene.arePillarsRotating = true;
+    scene.action = ACTION_ROTATING;
   };
 
   const rotateUiPillarCounterClockwise = (uiPillar) => {
-    if (scene.arePillarsRotating) {
+    if (scene.action !== ACTION_IDLE) {
       return;
     }
 
@@ -155,7 +220,7 @@ export const createPlayScene = (game) => {
     startUiPillarCounterClockwiseRotation(slaveUiPillarA);
     startUiPillarCounterClockwiseRotation(slaveUiPillarB);
 
-    scene.arePillarsRotating = true;
+    scene.action = ACTION_ROTATING;
   };
 
   const createUiPillars = () => {
@@ -241,6 +306,21 @@ export const createPlayScene = (game) => {
       arrowCounterClockwiseImage,
       rotate,
       () => rotateUiPillarCounterClockwise(uiPillar),
+    );
+  };
+
+  const createUiPlayAgainButton = () => {
+    const centerX = game.canvas.width / 2;
+    const centerY = game.canvas.height * PLAY_AGAIN_BUTTON_Y_RATIO;
+
+    return createUiButton(
+      centerX,
+      centerY,
+      PLAY_AGAIN_BUTTON_WIDTH,
+      PLAY_AGAIN_BUTTON_HEIGHT,
+      () => {
+        restart();
+      },
     );
   };
 
