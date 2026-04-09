@@ -19,7 +19,6 @@ import {
 import { createAnimationUpdateHandler } from "./handlers/animationUpdateHandler";
 import { createRenderDrawHandler } from "./handlers/renderDrawHandler";
 import { createRotationUpdateHandler } from "./handlers/rotationUpdateHandler";
-import { getPlayAgainButtonBounds } from "./renderers/solvedOverlayRenderer";
 import { createUiButton } from "./controls/uiButton";
 
 const PILLAR_RADIUS = 55;
@@ -60,9 +59,9 @@ export const createPlayScene = (game) => {
 
     scene.uiPillarButtons = createUiPillarButtons();
 
-    scene.uiPlayAggainButton = createUiPlayAgainButton();
+    scene.uiPlayAgainButton = createUiPlayAgainButton();
 
-    scene.action = ACTION_SOLVED;
+    scene.action = ACTION_IDLE;
 
     puzzle.shufflePillars();
     puzzle.setRandomSolveState();
@@ -97,19 +96,18 @@ export const createPlayScene = (game) => {
     });
 
     scene.action = ACTION_IDLE;
-    scene.isPlayAgainHover = false;
   };
 
   const handleClick = (x, y) => {
     if (scene.action === ACTION_SOLVED) {
       const isIntersect =
-        x >= scene.uiPlayAggainButton.left &&
-        x <= scene.uiPlayAggainButton.right &&
-        y >= scene.uiPlayAggainButton.top &&
-        y <= scene.uiPlayAggainButton.bottom;
+        x >= scene.uiPlayAgainButton.left &&
+        x <= scene.uiPlayAgainButton.right &&
+        y >= scene.uiPlayAgainButton.top &&
+        y <= scene.uiPlayAgainButton.bottom;
 
       if (isIntersect) {
-        scene.uiPlayAggainButton.onClick?.();
+        scene.uiPlayAgainButton.onClick?.();
       }
 
       return;
@@ -133,21 +131,21 @@ export const createPlayScene = (game) => {
   const handleMouseMove = (x, y) => {
     if (scene.action === ACTION_SOLVED) {
       const isIntersect =
-        x >= scene.uiPlayAggainButton.left &&
-        x <= scene.uiPlayAggainButton.right &&
-        y >= scene.uiPlayAggainButton.top &&
-        y <= scene.uiPlayAggainButton.bottom;
+        x >= scene.uiPlayAgainButton.left &&
+        x <= scene.uiPlayAgainButton.right &&
+        y >= scene.uiPlayAgainButton.top &&
+        y <= scene.uiPlayAgainButton.bottom;
 
-      if (isIntersect && !scene.uiPillarButton.isHover) {
-        scene.uiPillarButton.isHover = true;
+      if (isIntersect && !scene.uiPlayAgainButton.isHover) {
+        scene.uiPlayAgainButton.isHover = true;
 
         game.canvas.style.cursor = "pointer";
 
         return;
       }
 
-      if (!isIntersect && scene.uiPillarButton.isHover) {
-        scene.uiPillarButton.isHover = false;
+      if (!isIntersect && scene.uiPlayAgainButton.isHover) {
+        scene.uiPlayAgainButton.isHover = false;
 
         game.canvas.style.cursor = "default";
 
@@ -321,7 +319,7 @@ export const createPlayScene = (game) => {
       PLAY_AGAIN_BUTTON_WIDTH,
       PLAY_AGAIN_BUTTON_HEIGHT,
       () => {
-        game.restart();
+        restart();
       },
     );
   };

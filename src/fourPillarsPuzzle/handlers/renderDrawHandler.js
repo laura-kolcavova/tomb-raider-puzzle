@@ -11,7 +11,7 @@ export const createRenderDrawHandler = (game, scene, puzzle) => {
     drawUiPillarButtons();
 
     if (scene.action === ACTION_SOLVED) {
-      drawSolvedOverlay(game.canvasContext, scene.isPlayAgainHover);
+      drawSolvedOverlay(game.canvasContext, scene.uiPlayAgainButton);
     }
   };
 

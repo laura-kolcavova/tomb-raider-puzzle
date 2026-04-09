@@ -1,19 +1,8 @@
-export const getPlayAgainButtonBounds = (canvas) => {
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height * PLAY_AGAIN_BUTTON_Y_RATIO;
-  return {
-    left: centerX - PLAY_AGAIN_BUTTON_WIDTH / 2,
-    right: centerX + PLAY_AGAIN_BUTTON_WIDTH / 2,
-    top: centerY - PLAY_AGAIN_BUTTON_HEIGHT / 2,
-    bottom: centerY + PLAY_AGAIN_BUTTON_HEIGHT / 2,
-  };
-};
-
-export const drawSolvedOverlay = (canvasContext, isPlayAgainHover = false) => {
+export const drawSolvedOverlay = (canvasContext, uiPlayAgainButton) => {
   drawBackground(canvasContext);
   drawTitle(canvasContext);
   drawSubTitle(canvasContext);
-  drawPlayAgainButton(canvasContext, isPlayAgainHover);
+  drawPlayAgainButton(canvasContext, uiPlayAgainButton);
 };
 
 const drawBackground = (canvasContext) => {
@@ -46,19 +35,14 @@ const drawSubTitle = (canvasContext) => {
   canvasContext.fillText("All pillars are aligned.", width / 2, height * 0.5);
 };
 
-const drawPlayAgainButton = (canvasContext, isPlayAgainHover) => {
-  const { canvas } = canvasContext;
-  const { width, height } = canvas;
-
-  const bounds = getPlayAgainButtonBounds(canvas);
-
-  canvasContext.fillStyle = isPlayAgainHover ? "#16a34a" : "#166534";
+const drawPlayAgainButton = (canvasContext, uiPlayAgainButton) => {
+  canvasContext.fillStyle = uiPlayAgainButton.isHover ? "#16a34a" : "#166534";
   canvasContext.beginPath();
   canvasContext.roundRect(
-    bounds.left,
-    bounds.top,
-    PLAY_AGAIN_BUTTON_WIDTH,
-    PLAY_AGAIN_BUTTON_HEIGHT,
+    uiPlayAgainButton.left,
+    uiPlayAgainButton.top,
+    uiPlayAgainButton.width,
+    uiPlayAgainButton.height,
     8,
   );
   canvasContext.fill();
@@ -69,7 +53,7 @@ const drawPlayAgainButton = (canvasContext, isPlayAgainHover) => {
   canvasContext.font = "700 18px 'Play', sans-serif";
   canvasContext.fillText(
     "Play Again",
-    width / 2,
-    height * PLAY_AGAIN_BUTTON_Y_RATIO,
+    uiPlayAgainButton.centerX,
+    uiPlayAgainButton.centerY,
   );
 };
