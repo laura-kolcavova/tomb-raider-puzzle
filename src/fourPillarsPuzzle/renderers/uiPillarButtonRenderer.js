@@ -6,6 +6,7 @@ export const drawUiPillarButton = (canvasContext, uiPillarButton) => {
   const halfY = height / 2;
 
   canvasContext.save();
+
   canvasContext.translate(centerX, centerY);
   canvasContext.rotate(rotate);
 

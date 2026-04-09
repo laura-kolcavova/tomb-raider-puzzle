@@ -30,8 +30,6 @@ export const drawUiPillar = (canvasContext, uiPillar, rotationState) => {
 
   const baseAngle = rotationState * (Math.PI / 2);
 
-  console.log(rotationState);
-
   let animationAngle;
 
   if (isRotatingClockwise) {

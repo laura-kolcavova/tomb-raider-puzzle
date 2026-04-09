@@ -14,14 +14,10 @@ export const getPlayAgainButtonBounds = (canvas) => {
 };
 
 export const drawSolvedOverlay = (canvasContext, isPlayAgainHover = false) => {
-  canvasContext.save();
-
   drawBackground(canvasContext);
   drawTitle(canvasContext);
   drawSubTitle(canvasContext);
   drawPlayAgainButton(canvasContext, isPlayAgainHover);
-
-  canvasContext.restore();
 };
 
 const drawBackground = (canvasContext) => {
@@ -37,9 +33,9 @@ const drawTitle = (canvasContext) => {
   const { width, height } = canvas;
 
   canvasContext.fillStyle = "#ffffff";
-  canvasContext.font = "700 38px 'Play', sans-serif";
   canvasContext.textAlign = "center";
   canvasContext.textBaseline = "middle";
+  canvasContext.font = "700 38px 'Play', sans-serif";
   canvasContext.fillText("Puzzle Solved!", width / 2, height * 0.38);
 };
 
@@ -47,8 +43,10 @@ const drawSubTitle = (canvasContext) => {
   const { canvas } = canvasContext;
   const { width, height } = canvas;
 
-  canvasContext.font = "400 20px 'Play', sans-serif";
   canvasContext.fillStyle = "#d1fae5";
+  canvasContext.textAlign = "center";
+  canvasContext.textBaseline = "middle";
+  canvasContext.font = "400 20px 'Play', sans-serif";
   canvasContext.fillText("All pillars are aligned.", width / 2, height * 0.5);
 };
 
@@ -70,6 +68,8 @@ const drawPlayAgainButton = (canvasContext, isPlayAgainHover) => {
   canvasContext.fill();
 
   canvasContext.fillStyle = "#ffffff";
+  canvasContext.textAlign = "center";
+  canvasContext.textBaseline = "middle";
   canvasContext.font = "700 18px 'Play', sans-serif";
   canvasContext.fillText(
     "Play Again",

@@ -2,7 +2,7 @@ import { ACTION_IDLE, ACTION_ROTATING, ACTION_SOLVED } from "../playScene";
 import {
   endUiPillarClockwiseRotation,
   endUiPillarCounterClockwiseRotation,
-} from "../uiPillar";
+} from "../controls/uiPillar";
 
 export const createRotationUpdateHandler = (game, scene, puzzle) => {
   const handle = (gameTime) => {

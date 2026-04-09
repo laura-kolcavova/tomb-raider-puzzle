@@ -3,8 +3,8 @@ import {
   createUiPillar,
   startUiPillarClockwiseRotation,
   startUiPillarCounterClockwiseRotation,
-} from "./uiPillar";
-import { createUiPillarButton } from "./uiPillarButton";
+} from "./controls/uiPillar";
+import { createUiPillarButton } from "./controls/uiPillarButton";
 import {
   arrowClockwiseImage,
   arrowCounterClockwiseImage,

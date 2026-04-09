@@ -1,5 +1,5 @@
 import { ACTION_ROTATING } from "../playScene";
-import { updateUiPillarRotateAnimationProgress } from "../uiPillar";
+import { updateUiPillarRotateAnimationProgress } from "../controls/uiPillar";
 
 const PILLAR_ROTATE_ANIMATION_DURATION_IN_MS = 1000;
 

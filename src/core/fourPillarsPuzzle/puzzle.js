@@ -1,4 +1,4 @@
-import { randomBetween } from "../random";
+import { randomBetween } from "../utils/random";
 import {
   createPillar,
   PILLAR_END_ROTATION_STATE,
