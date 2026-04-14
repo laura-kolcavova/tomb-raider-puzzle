@@ -1,7 +1,9 @@
 import { createGameApp } from "./fourPillarsPuzzle/gameApp";
 
-const gameApp = createGameApp();
+window.addEventListener("load", () => {
+  const gameApp = createGameApp();
 
-gameApp.addCanvas("gameCanvas");
+  gameApp.addCanvas("gameCanvas");
 
-gameApp.run();
+  gameApp.run();
+});
