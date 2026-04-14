@@ -79,7 +79,7 @@ export const createPlayScene = (game) => {
 
     scene.uiRestartButton = createUiRestartButton();
 
-    scene.action = ACTION_SOLVED;
+    scene.action = ACTION_IDLE;
 
     puzzle.shufflePillars();
     puzzle.setRandomSolveState();

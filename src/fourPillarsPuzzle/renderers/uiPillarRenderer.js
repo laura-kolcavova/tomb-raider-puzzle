@@ -14,10 +14,6 @@ const PILLAR_PART_ANGLES = [
 
 const PILLAR_OFFSET_ANGLE = Math.PI / 4;
 
-const PILLAR_STROKE_COLOR = "#111827";
-
-const PILLAR_STROKE_WIDTH = 3;
-
 export const drawUiPillar = (canvasContext, uiPillar, rotationState) => {
   const {
     centerX,
@@ -60,7 +56,16 @@ export const drawUiPillar = (canvasContext, uiPillar, rotationState) => {
 
   canvasContext.beginPath();
   canvasContext.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-  canvasContext.strokeStyle = PILLAR_STROKE_COLOR;
-  canvasContext.lineWidth = PILLAR_STROKE_WIDTH;
+  canvasContext.strokeStyle = "#000000";
+  canvasContext.lineWidth = 1;
+  canvasContext.stroke();
+
+  canvasContext.beginPath();
+  canvasContext.arc(centerX, centerY, radius * 0.15, 0, 2 * Math.PI);
+  canvasContext.closePath();
+  canvasContext.fillStyle = "#FFFFFF";
+  canvasContext.fill();
+  canvasContext.strokeStyle = "#000000";
+  canvasContext.lineWidth = 1;
   canvasContext.stroke();
 };
