@@ -15,7 +15,7 @@ Each move rotates 3 pillars at once: the pillar you click and its 2 linked neigh
 
 - npm
 
-## Development
+## Local Development
 
 1. Install dependencies:
 
@@ -26,7 +26,7 @@ npm install
 2. Build the project:
 
 ```bash
-npm run build:prod
+npm run build:dev
 ```
 
 3. Run locally by opening `index.html` in your browser.
@@ -42,7 +42,7 @@ npm ci
 2. Build the project:
 
 ```bash
-npm run build:dev
+npm run build:prod
 ```
 
 3. Publish/deploy these files:
