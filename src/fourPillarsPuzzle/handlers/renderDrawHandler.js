@@ -6,7 +6,12 @@ import { drawUiImageButton } from "../renderers/uiImageButtonRenderer";
 
 export const createRenderDrawHandler = (game, scene, puzzle) => {
   const handle = (gameTime) => {
-    drawSolveStateLines(game.canvasContext, puzzle.solveState, scene.uiPillars);
+    drawSolveStateLines(
+      game.canvasContext,
+      scene.uiPillars,
+      puzzle.solveState,
+      puzzle.getCurrentState(),
+    );
     drawUiPillars();
     drawUiPillarButtons();
     drawUiImageButton(game.canvasContext, scene.uiRestartButton);
@@ -20,7 +25,7 @@ export const createRenderDrawHandler = (game, scene, puzzle) => {
     scene.uiPillars.forEach((uiPillar) => {
       const pillar = puzzle.getPillar(uiPillar.position);
 
-      drawUiPillar(game.canvasContext, uiPillar, pillar.rotationState);
+      drawUiPillar(game.canvasContext, uiPillar, pillar);
     });
   };
 

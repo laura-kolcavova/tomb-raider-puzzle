@@ -26,7 +26,7 @@ npm install
 2. Build the project:
 
 ```bash
-npm run build
+npm run build:prod
 ```
 
 3. Run locally by opening `index.html` in your browser.
@@ -42,7 +42,7 @@ npm ci
 2. Build the project:
 
 ```bash
-npm run build
+npm run build:dev
 ```
 
 3. Publish/deploy these files:

@@ -14,7 +14,7 @@ const PILLAR_PART_ANGLES = [
 
 const PILLAR_OFFSET_ANGLE = Math.PI / 4;
 
-export const drawUiPillar = (canvasContext, uiPillar, rotationState) => {
+export const drawUiPillar = (canvasContext, uiPillar, pillar) => {
   const {
     centerX,
     centerY,
@@ -24,7 +24,7 @@ export const drawUiPillar = (canvasContext, uiPillar, rotationState) => {
     rotateAnimationProgress,
   } = uiPillar;
 
-  const baseAngle = rotationState * (Math.PI / 2);
+  const baseAngle = pillar.rotationState * (Math.PI / 2);
 
   let animationAngle;
 

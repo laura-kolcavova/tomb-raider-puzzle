@@ -23,55 +23,70 @@ const GLOW_LINE_WIDTH = 12;
 const CORE_LINE_WIDTH = 6;
 const SHINE_LINE_WIDTH = 2;
 
-export const drawSolveStateLines = (canvasContext, solveState, uiPillars) => {
+export const drawSolveStateLines = (
+  canvasContext,
+  uiPillars,
+  solveState,
+  currentState,
+) => {
   drawHorizontalLine(
     canvasContext,
     uiPillars[POSITION_LEFT_TOP],
     uiPillars[POSITION_RIGHT_TOP],
-    solveState[POSITION_LEFT_TOP],
-    solveState[POSITION_RIGHT_TOP],
+    solveState,
+    currentState,
   );
 
   drawHorizontalLine(
     canvasContext,
     uiPillars[POSITION_LEFT_BOTTOM],
     uiPillars[POSITION_RIGHT_BOTTOM],
-    solveState[POSITION_LEFT_BOTTOM],
-    solveState[POSITION_RIGHT_BOTTOM],
+    solveState,
+    currentState,
   );
 
   drawVerticalLine(
     canvasContext,
     uiPillars[POSITION_LEFT_TOP],
     uiPillars[POSITION_LEFT_BOTTOM],
-    solveState[POSITION_LEFT_TOP],
-    solveState[POSITION_LEFT_BOTTOM],
+    solveState,
+    currentState,
   );
 
   drawVerticalLine(
     canvasContext,
     uiPillars[POSITION_RIGHT_TOP],
     uiPillars[POSITION_RIGHT_BOTTOM],
-    solveState[POSITION_RIGHT_TOP],
-    solveState[POSITION_RIGHT_BOTTOM],
+    solveState,
+    currentState,
   );
 };
 
 const drawHorizontalLine = (
   context,
-  pillarA,
-  pillarB,
-  solveRotationStateA,
-  solveRotationStateB,
+  uiPillarA,
+  uiPillarB,
+  solveState,
+  currentState,
 ) => {
-  const startX = pillarA.centerX;
-  const startY = pillarA.centerY;
-  const endX = pillarB.centerX;
+  const solveRotationStateA = solveState[uiPillarA.position];
+  const solveRotationStateB = solveState[uiPillarB.position];
+
+  const currentRotationStateA = currentState[uiPillarA.position];
+  const currentRotationStateB = currentState[uiPillarB.position];
+
+  const startX = uiPillarA.centerX;
+  const startY = uiPillarA.centerY;
+  const endX = uiPillarB.centerX;
   const midX = (startX + endX) / 2;
 
   const colorIndexA = PILLAR_PART_COLOR_INDEXES[solveRotationStateA][1];
   const colorIndexB = PILLAR_PART_COLOR_INDEXES[solveRotationStateB][3];
 
+  const arePillarsAligned =
+    currentRotationStateA === solveRotationStateA &&
+    currentRotationStateB === solveRotationStateB;
+
   drawLineSegment(
     context,
     startX,
@@ -79,6 +94,7 @@ const drawHorizontalLine = (
     midX,
     startY,
     PILLAR_PART_COLORS[colorIndexA],
+    arePillarsAligned,
   );
 
   drawLineSegment(
@@ -88,24 +104,34 @@ const drawHorizontalLine = (
     endX,
     startY,
     PILLAR_PART_COLORS[colorIndexB],
+    arePillarsAligned,
   );
 };
 
 const drawVerticalLine = (
   context,
-  pillarA,
-  pillarB,
-  solveRotationStateA,
-  solveRotationStateB,
+  uiPillarA,
+  uiPillarB,
+  solveState,
+  currentState,
 ) => {
-  const startX = pillarA.centerX;
-  const startY = pillarA.centerY;
-  const endX = pillarB.centerX;
-  const endY = pillarB.centerY;
+  const solveRotationStateA = solveState[uiPillarA.position];
+  const solveRotationStateB = solveState[uiPillarB.position];
+
+  const currentRotationStateA = currentState[uiPillarA.position];
+  const currentRotationStateB = currentState[uiPillarB.position];
+
+  const startX = uiPillarA.centerX;
+  const startY = uiPillarA.centerY;
+  const endY = uiPillarB.centerY;
   const midY = (startY + endY) / 2;
 
   const colorIndexA = PILLAR_PART_COLOR_INDEXES[solveRotationStateA][2];
   const colorIndexB = PILLAR_PART_COLOR_INDEXES[solveRotationStateB][0];
+
+  const arePillarsAligned =
+    currentRotationStateA === solveRotationStateA &&
+    currentRotationStateB === solveRotationStateB;
 
   drawLineSegment(
     context,
@@ -114,29 +140,41 @@ const drawVerticalLine = (
     startX,
     midY,
     PILLAR_PART_COLORS[colorIndexA],
+    arePillarsAligned,
   );
 
   drawLineSegment(
     context,
     startX,
     midY,
-    endX,
+    startX,
     endY,
     PILLAR_PART_COLORS[colorIndexB],
+    arePillarsAligned,
   );
 };
 
-const drawLineSegment = (context, startX, startY, endX, endY, color) => {
+const drawLineSegment = (
+  context,
+  startX,
+  startY,
+  endX,
+  endY,
+  color,
+  isGlowing,
+) => {
   context.save();
 
-  // context.shadowBlur = 12;
-  // context.shadowColor = withAlpha(color, 0.65);
-  // context.strokeStyle = withAlpha(color, 0.34);
-  // context.lineWidth = GLOW_LINE_WIDTH;
-  // context.beginPath();
-  // context.moveTo(startX, startY);
-  // context.lineTo(endX, endY);
-  // context.stroke();
+  if (isGlowing) {
+    context.shadowBlur = 12;
+    context.shadowColor = withAlpha(color, 0.65);
+    context.strokeStyle = withAlpha(color, 0.34);
+    context.lineWidth = GLOW_LINE_WIDTH;
+    context.beginPath();
+    context.moveTo(startX, startY);
+    context.lineTo(endX, endY);
+    context.stroke();
+  }
 
   context.shadowBlur = 0;
   context.strokeStyle = color;
