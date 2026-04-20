@@ -25,6 +25,7 @@ export const createUiImageButton = (
     hoverImage,
     onClick,
     isHover: false,
+    isVisible: true,
   };
 };
 

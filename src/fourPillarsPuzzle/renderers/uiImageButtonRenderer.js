@@ -1,6 +1,18 @@
 export const drawUiImageButton = (canvasContext, uiImageButton) => {
-  const { centerX, centerY, width, height, image, hoverImage, isHover } =
-    uiImageButton;
+  const {
+    centerX,
+    centerY,
+    width,
+    height,
+    image,
+    hoverImage,
+    isHover,
+    isVisible,
+  } = uiImageButton;
+
+  if (!isVisible) {
+    return;
+  }
 
   const halfX = width / 2;
   const halfY = height / 2;

@@ -127,20 +127,20 @@ export const createPlayScene = (game) => {
       return;
     }
 
-    if (uiImageButtonIntersectsWithPoint(scene.uiRestartButton, x, y)) {
+    if (
+      scene.uiRestartButton.isVisible &&
+      uiImageButtonIntersectsWithPoint(scene.uiRestartButton, x, y)
+    ) {
       scene.uiRestartButton.onClick?.();
 
       return;
     }
 
     for (const uiPillarButton of scene.uiPillarButtons) {
-      const isIntersect =
-        x >= uiPillarButton.left &&
-        x <= uiPillarButton.right &&
-        y >= uiPillarButton.top &&
-        y <= uiPillarButton.bottom;
-
-      if (isIntersect) {
+      if (
+        uiPillarButton.isVisible &&
+        uiImageButtonIntersectsWithPoint(uiPillarButton, x, y)
+      ) {
         uiPillarButton.onClick?.();
 
         return;
@@ -167,38 +167,57 @@ export const createPlayScene = (game) => {
       return;
     }
 
-    if (uiImageButtonIntersectsWithPoint(scene.uiRestartButton, x, y)) {
-      if (!scene.uiRestartButton.isHover) {
-        scene.uiRestartButton.isHover = true;
+    const isRestartButtonHovered =
+      scene.uiRestartButton.isVisible &&
+      uiImageButtonIntersectsWithPoint(scene.uiRestartButton, x, y);
 
-        game.canvas.style.cursor = "pointer";
+    scene.uiRestartButton.isHover = isRestartButtonHovered;
+
+    let anyPillarButtonHovered = false;
+
+    scene.uiPillars.forEach((uiPillar, index) => {
+      const dx = x - uiPillar.centerX;
+      const dy = y - uiPillar.centerY;
+      const hoverRadius = uiPillar.radius * 2;
+
+      const isNearPillar = Math.sqrt(dx * dx + dy * dy) <= hoverRadius;
+
+      const clockwiseButton = scene.uiPillarButtons[index * 2];
+      const counterClockwiseButton = scene.uiPillarButtons[index * 2 + 1];
+
+      clockwiseButton.isVisible = isNearPillar;
+      counterClockwiseButton.isVisible = isNearPillar;
+
+      if (isNearPillar) {
+        const isClockwiseHovered = uiImageButtonIntersectsWithPoint(
+          clockwiseButton,
+          x,
+          y,
+        );
+
+        clockwiseButton.isHover = isClockwiseHovered;
+
+        const isCounterClockwiseHovered = uiImageButtonIntersectsWithPoint(
+          counterClockwiseButton,
+          x,
+          y,
+        );
+
+        counterClockwiseButton.isHover = isCounterClockwiseHovered;
+
+        if (isClockwiseHovered || isCounterClockwiseHovered) {
+          anyPillarButtonHovered = true;
+        }
+      } else {
+        clockwiseButton.isHover = false;
+        counterClockwiseButton.isHover = false;
       }
+    });
+
+    if (isRestartButtonHovered || anyPillarButtonHovered) {
+      game.canvas.style.cursor = "pointer";
     } else {
-      if (scene.uiRestartButton.isHover) {
-        scene.uiRestartButton.isHover = false;
-
-        game.canvas.style.cursor = "default";
-      }
-    }
-
-    for (const uiPillarButton of scene.uiPillarButtons) {
-      const isIntersect =
-        x >= uiPillarButton.left &&
-        x <= uiPillarButton.right &&
-        y >= uiPillarButton.top &&
-        y <= uiPillarButton.bottom;
-
-      if (isIntersect && !uiPillarButton.isHover) {
-        uiPillarButton.isHover = true;
-
-        game.canvas.style.cursor = "pointer";
-      }
-
-      if (!isIntersect && uiPillarButton.isHover) {
-        uiPillarButton.isHover = false;
-
-        game.canvas.style.cursor = "default";
-      }
+      game.canvas.style.cursor = "default";
     }
   };
 
@@ -274,9 +293,11 @@ export const createPlayScene = (game) => {
 
     scene.uiPillars.forEach((uiPillar) => {
       const turnClockwiseButton = createTurnClockwiseButton(uiPillar);
+      turnClockwiseButton.isVisible = false;
 
       const turnCounterClockwiseButton =
         createTurnCounterClockwiseButton(uiPillar);
+      turnCounterClockwiseButton.isVisible = false;
 
       uiPillarButtons.push(turnClockwiseButton);
       uiPillarButtons.push(turnCounterClockwiseButton);
@@ -291,11 +312,10 @@ export const createPlayScene = (game) => {
     const centerX =
       uiPillar.centerX +
       Math.cos(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
+
     const centerY =
       uiPillar.centerY +
       Math.sin(pillarAngle) * TURN_BUTTON_DISTANCE_FROM_CENTER;
-
-    const rotate = -(45 * Math.PI) / 180;
 
     return createUiImageButton(
       centerX,
